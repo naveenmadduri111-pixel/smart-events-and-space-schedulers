@@ -1,0 +1,127 @@
+from datetime import datetime
+
+# Predefined spaces
+spaces = [
+    {"id": 1, "name": "Room A", "capacity": 50},
+    {"id": 2, "name": "Room B", "capacity": 100},
+    {"id": 3, "name": "Main Hall", "capacity": 200}
+]
+
+# Event storage (temporary memory)
+events = []
+
+# Check availability
+def is_available(space_id, start, end):
+    for e in events:
+        if e["space_id"] == space_id:
+            if start < e["end"] and end > e["start"]:
+                return False
+    return True
+
+# Find best space automatically
+def find_space(capacity, start, end):
+    for s in spaces:
+        if s["capacity"] >= capacity:
+            if is_available(s["id"], start, end):
+                return s
+    return None
+
+# Add event
+def add_event():
+    name = input("Enter event name: ")
+    capacity = int(input("Enter required capacity: "))
+    start = input("Start (YYYY-MM-DD HH:MM): ")
+    end = input("End (YYYY-MM-DD HH:MM): ")
+
+    start_dt = datetime.strptime(start, "%Y-%m-%d %H:%M")
+    end_dt = datetime.strptime(end, "%Y-%m-%d %H:%M")
+
+    space = find_space(capacity, start_dt, end_dt)
+
+    if space:
+        event = {
+            "name": name,
+            "space_id": space["id"],
+            "space_name": space["name"],
+            "start": start_dt,
+            "end": end_dt
+        }
+        events.append(event)
+        print(f"✅ Event scheduled in {space['name']}")
+    else:
+        print("❌ No available space!")
+
+# View events
+def view_events():
+    if not events:
+        print("No events scheduled.")
+        return
+
+    print("\n--- Scheduled Events ---")
+    for i, e in enumerate(events, 1):
+        print(f"{i}. {e['name']} | {e['space_name']} | {e['start']} → {e['end']}")
+
+# Delete event
+def delete_event():
+    view_events()
+    if not events:
+        return
+
+    choice = int(input("Enter event number to delete: "))
+    if 1 <= choice <= len(events):
+        removed = events.pop(choice - 1)
+        print(f"🗑️ Deleted event: {removed['name']}")
+    else:
+        print("Invalid choice!")
+
+# Add space
+def add_space():
+    name = input("Enter space name: ")
+    capacity = int(input("Enter capacity: "))
+
+    new_id = len(spaces) + 1
+    spaces.append({
+        "id": new_id,
+        "name": name,
+        "capacity": capacity
+    })
+
+    print("✅ Space added!")
+
+# View spaces
+def view_spaces():
+    print("\n--- Available Spaces ---")
+    for s in spaces:
+        print(f"{s['id']}. {s['name']} (Capacity: {s['capacity']})")
+
+# Main menu
+def main():
+    while True:
+        print("\n===== SMART SCHEDULER =====")
+        print("1. Add Event")
+        print("2. View Events")
+        print("3. Delete Event")
+        print("4. View Spaces")
+        print("5. Add Space")
+        print("6. Exit")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            add_event()
+        elif choice == "2":
+            view_events()
+        elif choice == "3":
+            delete_event()
+        elif choice == "4":
+            view_spaces()
+        elif choice == "5":
+            add_space()
+        elif choice == "6":
+            print("Exiting...")
+            break
+        else:
+            print("Invalid choice!")
+
+# Run program
+main()
